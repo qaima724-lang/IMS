@@ -35,21 +35,22 @@ async function run() {
   });
   console.log('[seed] users created: admin@shop.pk / admin123, cashier@shop.pk / cashier123');
 
-  const [piece, dozen, carton, box, pack, kg] = await Unit.insertMany([
+  const [piece, dozen, carton, box, pack, kg, bottle] = await Unit.insertMany([
     { name: 'Piece', shortCode: 'PC' },
     { name: 'Dozen', shortCode: 'DZ' },
     { name: 'Carton', shortCode: 'CTN' },
     { name: 'Box', shortCode: 'BOX' },
     { name: 'Pack', shortCode: 'PK' },
     { name: 'Kg', shortCode: 'KG' },
+    { name: 'Bottle', shortCode: 'BTL' },
   ]);
 
   const [catBiscuits, catGrocery, catBaby, catCandies, catBeverages, catCold] = await Category.insertMany([
     { name: 'Biscuits' }, { name: 'Grocery' }, { name: 'Baby Items' },
     { name: 'Candies' }, { name: 'Beverages' }, { name: 'Cold Drinks' },
   ]);
-  const [brandNestle, brandLU, brandNone] = await Brand.insertMany([
-    { name: 'Nestle' }, { name: 'LU' }, { name: 'Generic' },
+  const [brandNestle, brandLU, brandNone, brandNational, brandMehran] = await Brand.insertMany([
+    { name: 'Nestle' }, { name: 'LU' }, { name: 'Generic' }, { name: 'National' }, { name: 'Mehran' },
   ]);
 
   const [mainGodown, mainShop] = await Warehouse.insertMany([
@@ -103,7 +104,123 @@ async function run() {
     reorderLevel: 10, taxRatePercent: 0,
   });
 
+  // --- More products, one per remaining category, to give the catalog real breadth ---
+  const chocBiscuits = await Product.create({
+    name: 'Chocolate Biscuits', category: catBiscuits, brand: brandLU, sku: 'BIS-CHOC-01',
+    barcode: '8964000000042', baseUnit: piece._id, purchaseUnit: carton._id, saleUnit: piece._id,
+    unitConversions: [{ unit: carton._id, factor: 20 }, { unit: dozen._id, factor: 12 }],
+    pricing: { costPricePaisa: rsToPaisa(45), wholesalePricePaisa: rsToPaisa(52), retailPricePaisa: rsToPaisa(60) },
+    reorderLevel: 60, taxRatePercent: 0,
+  });
+
+  const milkPowder = await Product.create({
+    name: 'Milk Powder 900g', category: catGrocery, brand: brandNestle, sku: 'GRO-MILK-900',
+    barcode: '8964000000059', baseUnit: box._id, purchaseUnit: box._id, saleUnit: box._id,
+    unitConversions: [],
+    pricing: { costPricePaisa: rsToPaisa(780), wholesalePricePaisa: rsToPaisa(850), retailPricePaisa: rsToPaisa(920) },
+    reorderLevel: 15, taxRatePercent: 0,
+  });
+
+  const riceBag = await Product.create({
+    name: 'Basmati Rice', category: catGrocery, brand: brandNational, sku: 'GRO-RICE-KG',
+    barcode: '8964000000066', baseUnit: kg._id, purchaseUnit: kg._id, saleUnit: kg._id,
+    unitConversions: [],
+    pricing: { costPricePaisa: rsToPaisa(280), wholesalePricePaisa: rsToPaisa(310), retailPricePaisa: rsToPaisa(340) },
+    reorderLevel: 50, taxRatePercent: 0,
+  });
+
+  const candyBox = await Product.create({
+    name: 'Candy Box (Assorted)', category: catCandies, brand: brandNone, sku: 'CAN-BOX-01',
+    barcode: '8964000000073', baseUnit: piece._id, purchaseUnit: box._id, saleUnit: piece._id,
+    unitConversions: [{ unit: box._id, factor: 100 }],
+    pricing: { costPricePaisa: rsToPaisa(3), wholesalePricePaisa: rsToPaisa(4), retailPricePaisa: rsToPaisa(5) },
+    reorderLevel: 200, taxRatePercent: 0,
+  });
+
+  const cola1500 = await Product.create({
+    name: 'Cola 1.5L', category: catCold, brand: brandNone, sku: 'CLD-COLA-1500',
+    barcode: '8964000000080', baseUnit: bottle._id, purchaseUnit: carton._id, saleUnit: bottle._id,
+    unitConversions: [{ unit: carton._id, factor: 12 }],
+    pricing: { costPricePaisa: rsToPaisa(140), wholesalePricePaisa: rsToPaisa(160), retailPricePaisa: rsToPaisa(180) },
+    reorderLevel: 24, taxRatePercent: 17,
+  });
+
+  const mineralWater = await Product.create({
+    name: 'Mineral Water 1.5L', category: catBeverages, brand: brandNone, sku: 'BEV-WATER-1500',
+    barcode: '8964000000097', baseUnit: bottle._id, purchaseUnit: carton._id, saleUnit: bottle._id,
+    unitConversions: [{ unit: carton._id, factor: 12 }],
+    pricing: { costPricePaisa: rsToPaisa(45), wholesalePricePaisa: rsToPaisa(55), retailPricePaisa: rsToPaisa(65) },
+    reorderLevel: 24, taxRatePercent: 0,
+  });
+
+  const juicePack = await Product.create({
+    name: 'Juice 200ml (Mango)', category: catBeverages, brand: brandNone, sku: 'BEV-JUICE-200',
+    barcode: '8964000000103', baseUnit: piece._id, purchaseUnit: pack._id, saleUnit: piece._id,
+    unitConversions: [{ unit: pack._id, factor: 6 }, { unit: carton._id, factor: 24 }],
+    pricing: { costPricePaisa: rsToPaisa(22), wholesalePricePaisa: rsToPaisa(26), retailPricePaisa: rsToPaisa(30) },
+    reorderLevel: 48, taxRatePercent: 17,
+  });
+
+  const babyWipes = await Product.create({
+    name: 'Baby Wipes (80pcs)', category: catBaby, brand: brandNestle, sku: 'BABY-WIPE-80',
+    barcode: '8964000000110', baseUnit: pack._id, purchaseUnit: box._id, saleUnit: pack._id,
+    unitConversions: [{ unit: box._id, factor: 12 }],
+    pricing: { costPricePaisa: rsToPaisa(180), wholesalePricePaisa: rsToPaisa(210), retailPricePaisa: rsToPaisa(240) },
+    reorderLevel: 20, taxRatePercent: 0,
+  });
+
   console.log('[seed] products created with per-product unit conversions');
+
+  const supplier2 = await Supplier.create({
+    name: 'Karachi Wholesale Traders', businessName: 'Karachi Wholesale Traders',
+    phone: '0321-9876543', city: 'Karachi', ntn: '7654321-9',
+    creditLimitPaisa: rsToPaisa(400000), currentBalancePaisa: 0,
+  });
+
+  // --- Purchase 3: stocks the second batch of products, from a second supplier ---
+  const purchase3 = await purchaseService.completePurchase({
+    invoiceNumber: 'PINV-0003',
+    supplier: supplier2._id,
+    warehouse: mainGodown._id,
+    purchaseDate: new Date('2026-07-10'),
+    items: [
+      { product: chocBiscuits._id, batchNumber: 'CHOC-A-JUL26', quantity: 8, unitId: carton._id,
+        manufacturingDate: new Date('2026-06-10'), expiryDate: new Date('2027-02-10'), ratePaisa: rsToPaisa(45 * 20), taxPercent: 0 },
+      { product: milkPowder._id, batchNumber: 'MILK-A-JUL26', quantity: 25, unitId: box._id,
+        manufacturingDate: new Date('2026-05-01'), expiryDate: new Date('2027-11-01'), ratePaisa: rsToPaisa(780), taxPercent: 0 },
+      { product: riceBag._id, batchNumber: 'RICE-A-JUL26', quantity: 100, unitId: kg._id,
+        manufacturingDate: new Date('2026-06-01'), expiryDate: new Date('2028-06-01'), ratePaisa: rsToPaisa(280), taxPercent: 0 },
+      { product: candyBox._id, batchNumber: 'CANDY-A-JUL26', quantity: 5, unitId: box._id,
+        manufacturingDate: new Date('2026-06-01'), expiryDate: new Date('2027-06-01'), ratePaisa: rsToPaisa(3 * 100), taxPercent: 0 },
+      { product: cola1500._id, batchNumber: 'COLA1500-A-JUL26', quantity: 10, unitId: carton._id,
+        manufacturingDate: new Date('2026-06-15'), expiryDate: new Date('2027-06-15'), ratePaisa: rsToPaisa(140 * 12), taxPercent: 17 },
+      { product: mineralWater._id, batchNumber: 'WATER-A-JUL26', quantity: 15, unitId: carton._id,
+        manufacturingDate: new Date('2026-06-01'), expiryDate: new Date('2027-12-01'), ratePaisa: rsToPaisa(45 * 12), taxPercent: 0 },
+      { product: juicePack._id, batchNumber: 'JUICE-A-JUL26', quantity: 10, unitId: carton._id,
+        manufacturingDate: new Date('2026-06-20'), expiryDate: new Date('2026-12-20'), ratePaisa: rsToPaisa(22 * 24), taxPercent: 17 },
+      { product: babyWipes._id, batchNumber: 'WIPES-A-JUL26', quantity: 6, unitId: box._id,
+        manufacturingDate: new Date('2026-05-01'), expiryDate: new Date('2028-05-01'), ratePaisa: rsToPaisa(180 * 12), taxPercent: 0 },
+    ],
+    paidAmountPaisa: 0, // fully on credit, so Karachi Wholesale Traders shows an outstanding payable
+    user: admin._id,
+  });
+  console.log('[seed] purchase 3 (broader catalog) done:', purchase3.invoiceNumber);
+
+  // move a portion of each new product to Main Shop so POS search covers every category
+  await withTransaction(async (session) => {
+    const transfers = [
+      [chocBiscuits, 60, piece], [milkPowder, 10, box], [riceBag, 30, kg], [candyBox, 150, piece],
+      [cola1500, 40, bottle], [mineralWater, 60, bottle], [juicePack, 80, piece], [babyWipes, 30, pack],
+    ];
+    for (const [prod, qty, unit] of transfers) {
+      const p = await Product.findById(prod._id).session(session);
+      await inventoryService.transferStock({
+        product: prod._id, fromWarehouse: mainGodown._id, toWarehouse: mainShop._id,
+        baseQuantity: qty, enteredUnit: unit._id, conversionFactor: p.factorFor(unit._id), user: admin._id, session,
+      });
+    }
+  });
+  console.log('[seed] broader catalog stock transferred Main Godown -> Main Shop');
 
   // --- Purchase 1: creates Batch A of Marie Biscuits (older, expires sooner) ---
   const purchase1 = await purchaseService.completePurchase({

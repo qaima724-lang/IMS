@@ -31,13 +31,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  async function register(name, email, password) {
-    const d = await api.post('/auth/register', { name, email, password });
-    localStorage.setItem('ims_token', d.token);
-    setUser(d.user);
-  }
-
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

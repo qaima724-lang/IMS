@@ -8,31 +8,6 @@ function sign(user) {
   });
 }
 
-exports.register = asyncHandler(async (req, res) => {
-  const { email, password, name } = req.body;
-
-  if (!password || password.length < 8) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters' });
-  }
-
-  const existing = await User.findOne({ email: (email || '').toLowerCase() });
-  if (existing) {
-    return res.status(409).json({ message: 'Email is already registered' });
-  }
-
-  const user = await User.create({
-    email: (email || '').toLowerCase(),
-    password,
-    name,
-  });
-
-  const token = sign(user);
-  res.status(201).json({
-    token,
-    user: { id: user._id, name: user.name, email: user.email, role: user.role },
-  });
-});
-
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email: (email || '').toLowerCase() });
@@ -49,5 +24,3 @@ exports.login = asyncHandler(async (req, res) => {
 exports.me = asyncHandler(async (req, res) => {
   res.json({ user: req.user });
 });
-
-
