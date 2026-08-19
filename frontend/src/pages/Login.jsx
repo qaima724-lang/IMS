@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
 export default function Login() {
   const { login } = useAuth();
   const nav = useNavigate();
-  const [email, setEmail] = useState('admin@shop.pk');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -41,6 +41,9 @@ export default function Login() {
           {busy ? 'Signing in...' : 'Sign in'}
         </button>
         {error && <div className="error-text">{error}</div>}
+        <p style={{ marginTop: '1rem', textAlign: 'center' }}>
+          Don't have an account? <Link to="/register" style={{color: 'blue', textDecoration: 'underline'}}>Register</Link>
+        </p>
       </form>
     </div>
   );

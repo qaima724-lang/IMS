@@ -5,36 +5,51 @@ import { useAuth } from '../AuthContext';
 export default function Register() {
   const { register } = useAuth();
   const nav = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    error: '',
+    busy: false,
+  });
+
+  const { name, email, password, confirmPassword, error, busy } = form;
 
   async function submit(e) {
     e.preventDefault();
-    setError('');
+    setForm(prev => ({ ...prev, error: '' }));
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setForm(prev => ({ ...prev, error: 'Password must be at least 8 characters' }));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setForm(prev => ({ ...prev, error: 'Passwords do not match' }));
       return;
     }
 
-    setBusy(true);
+    setForm(prev => ({ ...prev, busy: true }));
     try {
       await register(name, email, password);
       nav('/');
     } catch (err) {
-      setError(err.message);
+      console.log('error', typeof err, err);
+      setForm(prev => ({
+        ...prev,
+        error: err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.',
+      }));
     } finally {
-      setBusy(false);
+      setForm(prev => ({ ...prev, busy: false }));
     }
   }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value, error: '' }));
+  };
 
   return (
     <div className="login-wrap">
@@ -43,26 +58,27 @@ export default function Register() {
         <p>Create your account</p>
         <div className="field">
           <label>Full Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} type="text" required />
+          <input name="name" value={name} onChange={handleInputChange} type="text" required />
         </div>
         <div className="field">
           <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+          <input name="email" value={email} onChange={handleInputChange} type="email" required />
         </div>
         <div className="field">
           <label>Password</label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
+          <input name="password" value={password} onChange={handleInputChange} type="password" required />
         </div>
         <div className="field">
           <label>Confirm Password</label>
           <input
+            name="confirmPassword"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={handleInputChange}
             type="password"
             required
           />
         </div>
-        <button className="primary" style={{ width: '100%' }} disabled={busy}>
+        <button type="submit" className="primary" style={{ width: '100%' }} disabled={busy}>
           {busy ? 'Creating account...' : 'Create account'}
         </button>
         {error && <div className="error-text">{error}</div>}

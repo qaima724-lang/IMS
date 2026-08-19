@@ -24,13 +24,13 @@ async function run() {
   const admin = await User.create({
     name: 'Shop Owner',
     email: 'admin@shop.pk',
-    passwordHash: await User.hashPassword('admin123'),
+    password: 'admin123',
     role: 'super_admin',
   });
   const cashier = await User.create({
     name: 'Cashier',
     email: 'cashier@shop.pk',
-    passwordHash: await User.hashPassword('cashier123'),
+    password: 'cashier123',
     role: 'cashier',
   });
   console.log('[seed] users created: admin@shop.pk / admin123, cashier@shop.pk / cashier123');

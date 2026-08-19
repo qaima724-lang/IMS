@@ -20,6 +20,12 @@ async function withTransaction(fn, { retries = 3 } = {}) {
         });
         return result;
       } catch (err) {
+        // Fallback for standalone MongoDB (no replica set)
+        if (err.code === 20 || (err.message && err.message.includes('replica set'))) {
+          // If transaction fails due to standalone topology, just run the function without a session
+          return await fn(undefined);
+        }
+
         const isTransient =
           err.errorLabels && err.errorLabels.includes('TransientTransactionError');
         if (isTransient && attempt <= retries) {

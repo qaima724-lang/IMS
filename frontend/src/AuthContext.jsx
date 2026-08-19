@@ -26,12 +26,22 @@ export function AuthProvider({ children }) {
     setUser(d.user);
   }
 
+  async function register(name, email, password) {
+    const d = await api.post('/auth/register', { name, email, password });
+    localStorage.setItem('ims_token', d.token);
+    setUser(d.user);
+  }
+
   function logout() {
     localStorage.removeItem('ims_token');
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
