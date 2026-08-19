@@ -15,6 +15,7 @@ const catalog = require('../controllers/catalogController');
 
 // --- auth ---
 router.post('/auth/login', authController.login);
+router.post('/auth/register', authController.register);
 router.get('/auth/me', requireAuth, authController.me);
 
 // everything below requires a logged-in user

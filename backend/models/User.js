@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    password: { type: String, required: true },
     // Phase 1: flat roles. Spec's granular permission matrix is a Phase-10 add-on
     // that can slot in later — role string stays, permissions table gets added.
     role: {
@@ -18,12 +18,20 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Hooks
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+    this.password = await bcrypt.hash(this.password, 12);
+});
+
+// Instance methods
 userSchema.methods.comparePassword = function (plain) {
-  return bcrypt.compare(plain, this.passwordHash);
+  return bcrypt.compare(plain, this.password);
 };
 
+// Static methods
 userSchema.statics.hashPassword = function (plain) {
-  return bcrypt.hash(plain, 10);
+  return bcrypt.hash(plain, 12);
 };
 
 module.exports = mongoose.model('User', userSchema);

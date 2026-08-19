@@ -14,6 +14,8 @@ import StockAdjust from './pages/StockAdjust';
 import StockTransfer from './pages/StockTransfer';
 import ExpiryReport from './pages/ExpiryReport';
 import LowStock from './pages/LowStock';
+import Register from './pages/Register';
+import NotFound from './pages/NotFound';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -26,6 +28,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route
         path="/"
         element={
@@ -47,6 +50,7 @@ export default function App() {
         <Route path="stock/expiry" element={<ExpiryReport />} />
         <Route path="stock/low" element={<LowStock />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
