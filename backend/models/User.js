@@ -25,13 +25,13 @@ userSchema.pre("save", async function () {
 });
 
 // Instance methods
-userSchema.methods.comparePassword = function (plain) {
-  return bcrypt.compare(plain, this.password);
+userSchema.methods.comparePassword = async function (plain) {
+  return await bcrypt.compare(plain, this.password);
 };
 
 // Static methods
-userSchema.statics.hashPassword = function (plain) {
-  return bcrypt.hash(plain, 12);
+userSchema.statics.hashPassword = async function (plain) {
+  return await bcrypt.hash(plain, 12);
 };
 
 module.exports = mongoose.model('User', userSchema);
